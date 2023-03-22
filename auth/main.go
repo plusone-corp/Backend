@@ -58,6 +58,7 @@ func AuthRouters(route *gin.RouterGroup) {
 	auth := route.Group("/auth")
 	auth.GET("/refresh", AuthMiddleware.RefreshHandler)
 	auth.POST("/login", AuthMiddleware.LoginHandler)
+	auth.POST("/register", createUser)
 	auth.Use(AuthMiddleware.MiddlewareFunc())
 	{
 		auth.GET("/hello", helloHandler)
