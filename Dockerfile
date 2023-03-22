@@ -21,7 +21,7 @@ ENV APP_NAME Backend
 
 # Copy only required data into this image
 COPY --from=build-env /$APP_NAME .
-COPY --from=build-env ./.env .
+COPY --from=build-env $GOPATH/src/$APP_NAME/.env .
 
 EXPOSE 80
 
