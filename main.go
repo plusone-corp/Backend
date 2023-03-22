@@ -49,7 +49,7 @@ func main() {
 	auth.AuthRouters(apiGroup)
 	user.UserHandler(apiGroup)
 
-	err = Router.Run()
+	err = Router.Run(":80")
 	if err != nil {
 		panic(err)
 	}
