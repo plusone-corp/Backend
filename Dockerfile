@@ -17,7 +17,7 @@ RUN CGO_ENABLED=0 go build -v -o /$APP_NAME $GOPATH/src/$APP_NAME/$CMD_PATH
 FROM alpine:latest
 
 # Set environment variable
-ENV APP_NAME geobot
+ENV APP_NAME Backend
 
 # Copy only required data into this image
 COPY --from=build-env /$APP_NAME .
