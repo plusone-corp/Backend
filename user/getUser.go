@@ -3,11 +3,15 @@ package user
 import (
 	"github.com/gin-gonic/gin"
 	"plusone/backend/database"
+	"plusone/backend/types"
 )
 
 func getUserIdHandler(c *gin.Context) {
 	id := c.Param("id")
-	user, found, error := database.GetByID(id)
+	userData, found, error := database.GetByID(id)
+
+	user := types.UserSensored{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Events: userData.Events, Posts: userData.Posts, Level: userData.Level}
+
 	if error != nil {
 		c.JSON(500, gin.H{
 			"status":  500,
@@ -30,7 +34,10 @@ func getUserIdHandler(c *gin.Context) {
 
 func getUserNameHandler(c *gin.Context) {
 	name := c.Param("name")
-	user, found, error := database.GetByUsername(name)
+	userData, found, error := database.GetByUsername(name)
+
+	user := types.UserSensored{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Events: userData.Events, Posts: userData.Posts, Level: userData.Level}
+
 	if error != nil {
 		c.JSON(500, gin.H{
 			"status":  500,
@@ -53,7 +60,10 @@ func getUserNameHandler(c *gin.Context) {
 
 func getUserEmailHandler(c *gin.Context) {
 	email := c.Param("email")
-	user, found, error := database.GetByEmail(email)
+	userData, found, error := database.GetByEmail(email)
+
+	user := types.UserSensored{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Events: userData.Events, Posts: userData.Posts, Level: userData.Level}
+
 	if error != nil {
 		c.JSON(500, gin.H{
 			"status":  500,

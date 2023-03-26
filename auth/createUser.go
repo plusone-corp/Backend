@@ -5,17 +5,21 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"plusone/backend/database"
+	"plusone/backend/types"
 	"time"
 )
 
 func createUser(c *gin.Context) {
-	username := c.PostForm("username")
-	password := c.PostForm("password")
-	email := c.PostForm("email")
-	displayName := c.PostForm("displayName")
+	var userData types.UserCreate
+
+	log.Println(c.Request.Body)
+
+	if c.ShouldBind(&userData) == nil {
+		log.Println(userData.Username)
+	}
 	salt := GenerateRandomSalt(10)
 
-	user, found, err := database.GetByUsername(username)
+	user, found, err := database.GetByUsername(userData.Username)
 	if err != nil {
 		log.Println(err)
 		c.JSON(500, gin.H{
@@ -31,20 +35,21 @@ func createUser(c *gin.Context) {
 		return
 	}
 
-	user = &database.User{
-		Username:    username,
-		DisplayName: displayName,
-		CreatedAt:   time.Now().Unix(),
-		IconURL:     "https://plusone-corp.github.io/PlusOne/logo/adaptive-icon-1024.png",
+	user = &types.User{
+		Username:    userData.Username,
+		DisplayName: userData.DisplayName,
+		CreatedAt:   time.Now(),
+		Avatar:      "https://plusone-corp.github.io/PlusOne/logo/adaptive-icon-1024.png",
 		ID:          primitive.NewObjectID(),
-		Email:       email,
-		Credentials: database.Credentials{
-			Password:      HashPassword(password, salt),
+		Email:       userData.Email,
+		Credentials: types.Credentials{
+			Password:      HashPassword(userData.Password, salt),
 			Hash:          salt,
-			RefreshToken:  "",
-			LastRefreshed: time.Now().Unix(),
+			LastRefreshed: time.Now(),
 		},
 	}
+
+	log.Println(user)
 
 	ok, err := database.CreateUser(*user)
 	if err != nil || !ok {
