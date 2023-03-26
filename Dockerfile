@@ -8,7 +8,7 @@ ENV ENV_NAME .env
 ENV CMD_PATH main.go
 
 # Copy application data into image
-COPY .. $GOPATH/src/$APP_NAME
+COPY . $GOPATH/src/$APP_NAME
 COPY .env /$ENV_NAME
 WORKDIR $GOPATH/src/$APP_NAME
 
