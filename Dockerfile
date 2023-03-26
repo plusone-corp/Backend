@@ -15,15 +15,6 @@ WORKDIR $GOPATH/src/$APP_NAME
 # Budild application
 RUN CGO_ENABLED=0 go build -v -o /$APP_NAME $GOPATH/src/$APP_NAME/$CMD_PATH
 
-## Nginx Stage
-FROM ubuntu as nginx-server
-
-RUN apt-get -y update && apt-get -y install nginx
-COPY ./build/default.conf /etc/nginx/sites-available/default
-EXPOSE 80/tcp
-
-CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
-
 # Run Stage
 FROM alpine:latest
 
