@@ -26,6 +26,11 @@ func AuthUser(username string, password string) (bool, error) {
 	return isCorrect, nil
 }
 
+type Login struct {
+	Username string `form:"username"`
+	Password string `form:"password"`
+}
+
 func Authenticator(c *gin.Context) (interface{}, error) {
 	var loginVals Login
 	if err := c.ShouldBind(&loginVals); err != nil {

@@ -12,8 +12,6 @@ import (
 func createUser(c *gin.Context) {
 	var userData types.UserCreate
 
-	log.Println(c.Request.Body)
-
 	if c.ShouldBind(&userData) == nil {
 		log.Println(userData.Username)
 	}
@@ -48,8 +46,6 @@ func createUser(c *gin.Context) {
 			LastRefreshed: time.Now(),
 		},
 	}
-
-	log.Println(user)
 
 	ok, err := database.CreateUser(*user)
 	if err != nil || !ok {

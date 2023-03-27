@@ -22,7 +22,7 @@ func main() {
 
 	var err error
 	auth.AuthMiddleware, err = jwt.New(&jwt.GinJWTMiddleware{
-		Realm:           "PlusOne",
+		Realm:           config.IDENTIFY_KEY,
 		Key:             []byte(config.JWT_SECRET),
 		Timeout:         time.Minute * time.Duration(config.JWT_TIMEOUT_TIME),
 		MaxRefresh:      time.Hour * time.Duration(config.JWT_REFRESH_TIME),
