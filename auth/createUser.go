@@ -12,8 +12,12 @@ import (
 func createUser(c *gin.Context) {
 	var userData types.UserCreate
 
-	if c.ShouldBind(&userData) == nil {
-		log.Println(userData.Username)
+	if c.ShouldBind(&userData) != nil {
+		c.JSON(400, gin.H{
+			"status":  400,
+			"message": "Invalid form body",
+		})
+		return
 	}
 	salt := GenerateRandomSalt(10)
 
@@ -33,6 +37,8 @@ func createUser(c *gin.Context) {
 		return
 	}
 
+	log.Println(userData.Description)
+
 	user = &types.User{
 		Username:    userData.Username,
 		DisplayName: userData.DisplayName,
@@ -44,6 +50,15 @@ func createUser(c *gin.Context) {
 			Password:      HashPassword(userData.Password, salt),
 			Hash:          salt,
 			LastRefreshed: time.Now(),
+		},
+		Age:     0,
+		Events:  []types.Event{},
+		Friends: []types.Friend{},
+		Posts:   []types.Post{},
+		Level: types.Level{
+			Exp:    0,
+			Level:  0,
+			Badges: 0,
 		},
 	}
 

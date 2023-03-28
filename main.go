@@ -6,7 +6,8 @@ import (
 	"log"
 	"plusone/backend/auth"
 	"plusone/backend/config"
-	"plusone/backend/user"
+	"plusone/backend/posts"
+	"plusone/backend/users"
 	"time"
 )
 
@@ -45,9 +46,9 @@ func main() {
 		log.Fatal("AuthMiddleware.MiddlewareInit() Error:" + errInit.Error())
 	}
 
-	apiGroup := Router.Group("/api")
-	auth.AuthRouters(apiGroup)
-	user.UserHandler(apiGroup)
+	auth.AuthRouters(Router)
+	users.UserHandler(Router)
+	posts.PostHandlers(Router)
 
 	err = Router.Run(":80")
 	if err != nil {

@@ -1,12 +1,12 @@
-package user
+package users
 
 import (
 	"github.com/gin-gonic/gin"
 	"plusone/backend/auth"
 )
 
-func UserHandler(route *gin.RouterGroup) {
-	group := route.Group("/user")
+func UserHandler(route *gin.Engine) {
+	group := route.Group("/users")
 	getUser(group)
 	group.Use(auth.AuthMiddleware.MiddlewareFunc())
 	{

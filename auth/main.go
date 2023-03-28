@@ -9,7 +9,7 @@ var (
 	AuthMiddleware *jwt.GinJWTMiddleware
 )
 
-func AuthRouters(route *gin.RouterGroup) {
+func AuthRouters(route *gin.Engine) {
 	auth := route.Group("/auth")
 	auth.GET("/refresh", AuthMiddleware.RefreshHandler)
 	auth.POST("/login", AuthMiddleware.LoginHandler)

@@ -2,12 +2,16 @@ package database
 
 import (
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"log"
 	"plusone/backend/types"
 )
 
-func GetByID(id string) (*types.User, bool, error) {
+func GetByID(id primitive.ObjectID) (*types.User, bool, error) {
 	var user *types.User
+
+	log.Println(id.String())
 
 	err := UserCollection.FindOne(Context, bson.D{{"_id", id}}).Decode(&user)
 	if err == mongo.ErrNoDocuments {
@@ -51,5 +55,14 @@ func CreateUser(user types.User) (bool, error) {
 		return false, err
 	}
 
+	return true, nil
+}
+
+func UpdateUser(userID primitive.ObjectID, user types.User) (bool, error) {
+	log.Println(len(user.Posts), user.Posts[0].Title)
+	_, err := UserCollection.UpdateByID(Context, bson.D{{"_id", userID}}, bson.D{{"$set", bson.D{{"posts", user.Posts}}}})
+	if err != nil {
+		return false, err
+	}
 	return true, nil
 }

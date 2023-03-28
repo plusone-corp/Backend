@@ -1,4 +1,4 @@
-package user
+package users
 
 import (
 	"github.com/gin-gonic/gin"
@@ -10,5 +10,7 @@ func getUser(c *gin.RouterGroup) {
 	group.Use(auth.AuthMiddleware.MiddlewareFunc())
 	{
 		group.GET("/", getMe)
+		postGroup := group.Group("/post")
+		postGroup.GET("/latest", getLatestPost)
 	}
 }

@@ -1,16 +1,25 @@
-package user
+package users
 
 import (
-	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"plusone/backend/config"
 	"plusone/backend/database"
 	"plusone/backend/types"
+	"plusone/backend/utils"
 )
 
 func getUserIdHandler(c *gin.Context) {
 	id := c.Param("id")
-	userData, found, error := database.GetByID(id)
+	objId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"status":  400,
+			"message": "Invalid ID",
+		})
+		return
+	}
+	userData, found, error := database.GetByID(objId)
 
 	user := types.UserSensored{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Events: userData.Events, Posts: userData.Posts, Level: userData.Level}
 
@@ -30,7 +39,7 @@ func getUserIdHandler(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"status":  200,
 		"message": "User found!",
-		"user":    user,
+		"users":   user,
 	})
 }
 
@@ -56,7 +65,7 @@ func getUserNameHandler(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"status":  200,
 		"message": "User found!",
-		"user":    user,
+		"users":   user,
 	})
 }
 
@@ -82,31 +91,16 @@ func getUserEmailHandler(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"status":  200,
 		"message": "User found!",
-		"user":    user,
+		"users":   user,
 	})
 }
 
 func getMe(c *gin.Context) {
-	claims := jwt.ExtractClaims(c)
-	username, _ := c.Get(config.IDENTIFY_KEY)
-	user, found, error := database.GetByUsername(username.(*types.User).Username)
-	if error != nil {
-		c.JSON(500, gin.H{
-			"status":  500,
-			"message": "Internal Server Error",
-		})
-		return
-	} else if !found {
-		c.JSON(500, gin.H{
-			"status":  500,
-			"message": "Internal Server Error",
-		})
-		return
-	}
+	user, claims := utils.GetUser(c)
 	c.JSON(200, gin.H{
 		"status": 200,
 		"userID": claims[config.IDENTIFY_KEY],
-		"user": types.User{
+		"users": types.User{
 			Username:    user.Username,
 			Email:       user.Email,
 			Age:         user.Age,
