@@ -6,7 +6,9 @@ import (
 	"log"
 	"plusone/backend/auth"
 	"plusone/backend/config"
-	"plusone/backend/user"
+	"plusone/backend/events"
+	"plusone/backend/posts"
+	"plusone/backend/users"
 	"time"
 )
 
@@ -22,7 +24,7 @@ func main() {
 
 	var err error
 	auth.AuthMiddleware, err = jwt.New(&jwt.GinJWTMiddleware{
-		Realm:           "PlusOne",
+		Realm:           config.IDENTIFY_KEY,
 		Key:             []byte(config.JWT_SECRET),
 		Timeout:         time.Minute * time.Duration(config.JWT_TIMEOUT_TIME),
 		MaxRefresh:      time.Hour * time.Duration(config.JWT_REFRESH_TIME),
@@ -45,11 +47,12 @@ func main() {
 		log.Fatal("AuthMiddleware.MiddlewareInit() Error:" + errInit.Error())
 	}
 
-	apiGroup := Router.Group("/api")
-	auth.AuthRouters(apiGroup)
-	user.UserHandler(apiGroup)
+	auth.AuthRouters(Router)
+	users.UserHandler(Router)
+	posts.PostHandlers(Router)
+	events.EventsHandlers(Router)
 
-	err = Router.Run()
+	err = Router.Run(":80")
 	if err != nil {
 		panic(err)
 	}

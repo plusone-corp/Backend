@@ -10,9 +10,11 @@ import (
 )
 
 var (
-	Client         *mongo.Client
-	UserCollection *mongo.Collection
-	Context        context.Context
+	Client           *mongo.Client
+	UserCollection   *mongo.Collection
+	PostCollection   *mongo.Collection
+	EventsCollection *mongo.Collection
+	Context          context.Context
 )
 
 func init() {
@@ -29,4 +31,6 @@ func init() {
 	log.Println("Connected to database!")
 
 	UserCollection = Client.Database("PlusOne").Collection("users")
+	PostCollection = Client.Database("PlusOne").Collection("posts")
+	EventsCollection = Client.Database("PlusOne").Collection("events")
 }
