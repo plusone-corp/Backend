@@ -59,18 +59,28 @@ func createPost(c *gin.Context) {
 
 	user, _ := utils.GetUser(c)
 
+	eventObjId, err := primitive.ObjectIDFromHex(post.Event)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"status":  400,
+			"message": "Invalid ID",
+		})
+		return
+	}
+
 	newPost := types.Post{
 		Id:          primitive.NewObjectID(),
 		Description: post.Description,
 		Title:       post.Title,
-		Author:      post.Author,
+		Author:      user.ID,
+		Event:       eventObjId,
 		Image:       post.Image,
 		Reactions:   []types.Reaction{},
 		Comments:    []types.Comment{},
 		CreatedAt:   time.Now(),
 	}
 
-	res, found, error := database.CreatePost(user.ID, newPost)
+	res, found, error := database.CreatePost(newPost)
 	if !found && error == nil {
 		c.JSON(400, gin.H{
 			"status":  400,

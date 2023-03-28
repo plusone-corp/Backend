@@ -6,6 +6,7 @@ import (
 	"log"
 	"plusone/backend/auth"
 	"plusone/backend/config"
+	"plusone/backend/events"
 	"plusone/backend/posts"
 	"plusone/backend/users"
 	"time"
@@ -49,6 +50,7 @@ func main() {
 	auth.AuthRouters(Router)
 	users.UserHandler(Router)
 	posts.PostHandlers(Router)
+	events.EventsHandlers(Router)
 
 	err = Router.Run(":80")
 	if err != nil {

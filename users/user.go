@@ -12,5 +12,6 @@ func getUser(c *gin.RouterGroup) {
 		group.GET("/", getMe)
 		postGroup := group.Group("/post")
 		postGroup.GET("/latest", getLatestPost)
+		postGroup.GET("/all", getAllPost)
 	}
 }

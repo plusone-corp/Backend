@@ -58,11 +58,15 @@ func CreateUser(user types.User) (bool, error) {
 	return true, nil
 }
 
-func UpdateUser(userID primitive.ObjectID, user types.User) (bool, error) {
-	log.Println(len(user.Posts), user.Posts[0].Title)
-	_, err := UserCollection.UpdateByID(Context, bson.D{{"_id", userID}}, bson.D{{"$set", bson.D{{"posts", user.Posts}}}})
+func GetManyUserID(ids []primitive.ObjectID) (*[]types.UserSensored, bool, error) {
+	var users []types.UserSensored
+	cursor, err := UserCollection.Find(Context, bson.D{{"_id", bson.D{{"$in", ids}}}})
 	if err != nil {
-		return false, err
+		return nil, false, err
 	}
-	return true, nil
+
+	if err = cursor.All(Context, &users); err != nil {
+		return nil, false, err
+	}
+	return &users, true, nil
 }
