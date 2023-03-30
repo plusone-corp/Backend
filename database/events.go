@@ -44,7 +44,7 @@ func SensoreUser(userData types.User) types.UserSensored {
 }
 
 func validateEvent(res *types.Event) (*types.ResEvent, bool, error) {
-	author, found, err := GetByID(res.Author)
+	author, found, err := GetUserByID(res.Author)
 	if !found && err == nil {
 		return nil, false, nil
 	} else if !found && err != nil {

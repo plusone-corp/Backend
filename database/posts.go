@@ -101,7 +101,7 @@ func GetAllPost(userId primitive.ObjectID) (*[]types.Post, bool, error) {
 }
 
 func validateUser(res types.Post) (*types.ResPost, bool, error) {
-	user, found, err := GetByID(res.Author)
+	user, found, err := GetUserByID(res.Author)
 	if !found && err == nil {
 		return nil, false, nil
 	} else if !found && err != nil {

@@ -3,7 +3,6 @@ package users
 import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"plusone/backend/config"
 	"plusone/backend/database"
 	"plusone/backend/types"
 	"plusone/backend/utils"
@@ -19,7 +18,7 @@ func getUserIdHandler(c *gin.Context) {
 		})
 		return
 	}
-	userData, found, error := database.GetByID(objId)
+	userData, found, error := database.GetUserByID(objId)
 
 	user := types.UserSensored{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Level: userData.Level}
 
@@ -45,7 +44,7 @@ func getUserIdHandler(c *gin.Context) {
 
 func getUserNameHandler(c *gin.Context) {
 	name := c.Param("name")
-	userData, found, error := database.GetByUsername(name)
+	userData, found, error := database.GetUserByUsername(name)
 
 	user := types.UserSensored{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Level: userData.Level}
 
@@ -71,7 +70,7 @@ func getUserNameHandler(c *gin.Context) {
 
 func getUserEmailHandler(c *gin.Context) {
 	email := c.Param("email")
-	userData, found, error := database.GetByEmail(email)
+	userData, found, error := database.GetUserByEmail(email)
 
 	user := types.UserSensored{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Level: userData.Level}
 
@@ -106,7 +105,7 @@ func getMe(c *gin.Context) {
 	}
 	c.JSON(200, gin.H{
 		"status": 200,
-		"userID": claims[config.IDENTIFY_KEY],
+		"userID": claims.ID,
 		"users":  user,
 	})
 }

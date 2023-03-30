@@ -6,9 +6,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"plusone/backend/types"
+	"time"
 )
 
-func GetByID(id primitive.ObjectID) (*types.User, bool, error) {
+func GetUserByID(id primitive.ObjectID) (*types.User, bool, error) {
 	var user *types.User
 
 	log.Println(id.String())
@@ -23,7 +24,7 @@ func GetByID(id primitive.ObjectID) (*types.User, bool, error) {
 	return user, true, nil
 }
 
-func GetByEmail(email string) (*types.User, bool, error) {
+func GetUserByEmail(email string) (*types.User, bool, error) {
 	var user *types.User
 
 	err := UserCollection.FindOne(Context, bson.D{{"email", email}}).Decode(&user)
@@ -36,7 +37,7 @@ func GetByEmail(email string) (*types.User, bool, error) {
 	return user, true, nil
 }
 
-func GetByUsername(username string) (*types.User, bool, error) {
+func GetUserByUsername(username string) (*types.User, bool, error) {
 	var user *types.User
 
 	err := UserCollection.FindOne(Context, bson.D{{"username", username}}).Decode(&user)
@@ -69,4 +70,15 @@ func GetManyUserID(ids []primitive.ObjectID) (*[]types.UserSensored, bool, error
 		return nil, false, err
 	}
 	return &users, true, nil
+}
+
+func UpdateRefreshToken(userId primitive.ObjectID, token string) error {
+	res, err := UserCollection.UpdateOne(Context, bson.D{{"_id", userId}}, bson.D{{"$set", bson.D{{"credentials.refreshToken", token}, {"credentials.lastRefreshed", time.Now()}}}})
+	if err != nil {
+		return err
+	}
+
+	log.Println(res.ModifiedCount, res.UpsertedID, res.MatchedCount, userId)
+
+	return nil
 }

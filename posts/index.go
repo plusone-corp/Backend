@@ -7,7 +7,7 @@ import (
 
 func PostHandlers(c *gin.Engine) {
 	group := c.Group("/posts")
-	group.Use(auth.AuthMiddleware.MiddlewareFunc())
+	group.Use(auth.JwtMiddleware())
 	{
 		group.GET("/get/:id", getPostID)
 		group.POST("/create", createPost)

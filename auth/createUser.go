@@ -21,7 +21,7 @@ func createUser(c *gin.Context) {
 	}
 	salt := GenerateRandomSalt(10)
 
-	user, found, err := database.GetByUsername(userData.Username)
+	user, found, err := database.GetUserByUsername(userData.Username)
 	if err != nil {
 		log.Println(err)
 		c.JSON(500, gin.H{
@@ -37,8 +37,6 @@ func createUser(c *gin.Context) {
 		return
 	}
 
-	log.Println(userData.Description)
-
 	user = &types.User{
 		Username:    userData.Username,
 		DisplayName: userData.DisplayName,
@@ -49,6 +47,7 @@ func createUser(c *gin.Context) {
 		Credentials: types.Credentials{
 			Password:      HashPassword(userData.Password, salt),
 			Hash:          salt,
+			RefreshToken:  "",
 			LastRefreshed: time.Now(),
 		},
 		Description: userData.Description,
