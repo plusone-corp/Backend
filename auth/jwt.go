@@ -91,21 +91,9 @@ func ParseRefreshToken(tokenStr string) (*types.SignedDetails, bool, *string) {
 
 func JwtMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.AuthorizationKeyNotFound)
-			c.Abort()
-			return
-		}
+		token := c.GetHeader("X-Token")
 
-		token, err := validateHeaders(c.GetHeader("Authorization"))
-		if token == nil {
-			errorHandler.Unauthorized(c, http.StatusBadRequest, *err)
-			c.Abort()
-			return
-		}
-
-		claims, valid, parseErr := ParseAccessToken(*token)
+		claims, valid, parseErr := ParseAccessToken(token)
 		if !valid && parseErr != nil {
 			errorHandler.Unauthorized(c, http.StatusUnauthorized, *parseErr)
 			c.Abort()
