@@ -34,7 +34,7 @@ func getUserIdHandler(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"status":  200,
 		"message": "User found!",
-		"users":   user,
+		"user":    user,
 	})
 }
 
@@ -54,7 +54,7 @@ func getUserNameHandler(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"status":  200,
 		"message": "User found!",
-		"users":   user,
+		"user":    user,
 	})
 }
 
@@ -74,7 +74,7 @@ func getUserEmailHandler(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"status":  200,
 		"message": "User found!",
-		"users":   user,
+		"user":    user,
 	})
 }
 
@@ -87,6 +87,6 @@ func getMe(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"status": 200,
 		"userID": claims.ID,
-		"users":  user,
+		"user":   user,
 	})
 }
