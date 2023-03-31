@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"log"
 	"net/http"
 	"plusone/backend/config"
 	"plusone/backend/database"
@@ -90,6 +91,13 @@ func ParseRefreshToken(tokenStr string) (*types.SignedDetails, bool, *string) {
 
 func JwtMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.AuthorizationKeyNotFound)
+			c.Abort()
+			return
+		}
+
 		token, err := validateHeaders(c.GetHeader("Authorization"))
 		if token == nil {
 			errorHandler.Unauthorized(c, http.StatusBadRequest, *err)
@@ -111,6 +119,7 @@ func JwtMiddleware() gin.HandlerFunc {
 }
 
 func validateHeaders(header string) (*string, *string) {
+	log.Println(header)
 	if !strings.HasPrefix(header, "Bearer") {
 		return nil, &errorHandler.InvalidMethod
 	}
