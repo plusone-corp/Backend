@@ -95,6 +95,10 @@ func JwtMiddleware() gin.HandlerFunc {
 
 		claims, valid, parseErr := ParseAccessToken(token)
 		if !valid && parseErr != nil {
+			if claims.ExpiresAt.Unix() > time.Now().Unix() {
+				errorHandler.Unauthorized(c, http.StatusRequestTimeout, errorHandler.RefreshToken)
+				return
+			}
 			errorHandler.Unauthorized(c, http.StatusUnauthorized, *parseErr)
 			c.Abort()
 			return

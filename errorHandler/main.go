@@ -13,6 +13,7 @@ var (
 	InternalServerError      = "Internal server error, please try again later!"
 	UsernameExisted          = "Username already existed"
 	InvalidID                = "The User ID provided is invalid or not found!"
+	RefreshToken             = "Access token expired, please refresh the token!"
 )
 
 func Unauthorized(c *gin.Context, statusCode int, message string) {
