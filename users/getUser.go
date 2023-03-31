@@ -3,7 +3,9 @@ package users
 import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"net/http"
 	"plusone/backend/database"
+	"plusone/backend/errorHandler"
 	"plusone/backend/types"
 	"plusone/backend/utils"
 )
@@ -23,16 +25,10 @@ func getUserIdHandler(c *gin.Context) {
 	user := types.UserSensored{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Level: userData.Level}
 
 	if error != nil {
-		c.JSON(500, gin.H{
-			"status":  500,
-			"message": "Internal Server Error!",
-		})
+		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
 		return
 	} else if !found {
-		c.JSON(400, gin.H{
-			"status":  400,
-			"message": "User ID not found!",
-		})
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidID)
 		return
 	}
 	c.JSON(200, gin.H{
@@ -49,16 +45,10 @@ func getUserNameHandler(c *gin.Context) {
 	user := types.UserSensored{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Level: userData.Level}
 
 	if error != nil {
-		c.JSON(500, gin.H{
-			"status":  500,
-			"message": "Internal Server Error!",
-		})
+		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
 		return
 	} else if !found {
-		c.JSON(400, gin.H{
-			"status":  400,
-			"message": "User ID not found!",
-		})
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidID)
 		return
 	}
 	c.JSON(200, gin.H{
@@ -75,16 +65,10 @@ func getUserEmailHandler(c *gin.Context) {
 	user := types.UserSensored{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Level: userData.Level}
 
 	if error != nil {
-		c.JSON(500, gin.H{
-			"status":  500,
-			"message": "Internal Server Error!",
-		})
+		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
 		return
 	} else if !found {
-		c.JSON(400, gin.H{
-			"status":  400,
-			"message": "User ID not found!",
-		})
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidID)
 		return
 	}
 	c.JSON(200, gin.H{
@@ -97,10 +81,7 @@ func getUserEmailHandler(c *gin.Context) {
 func getMe(c *gin.Context) {
 	user, claims := utils.GetUser(c)
 	if user == nil {
-		c.JSON(500, gin.H{
-			"status":  500,
-			"message": "Internal Server Error!",
-		})
+		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
 		return
 	}
 	c.JSON(200, gin.H{

@@ -1,11 +1,11 @@
 package events
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log"
+	"net/http"
 	"plusone/backend/database"
+	"plusone/backend/errorHandler"
 	"plusone/backend/types"
 	"plusone/backend/utils"
 	"time"
@@ -15,19 +15,13 @@ func getEventID(c *gin.Context) {
 	id := c.Param("id")
 	objId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"status":  400,
-			"message": "Invalid ID",
-		})
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidFormBody)
 		return
 	}
 
 	event, found, err := database.GetEventID(objId)
 	if !found {
-		c.JSON(404, gin.H{
-			"status":  404,
-			"message": fmt.Sprintf("Event with ID %v not found!", objId),
-		})
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidID)
 		return
 	}
 
@@ -42,11 +36,7 @@ func createEvent(c *gin.Context) {
 
 	err := c.ShouldBind(&form)
 	if err != nil {
-		log.Println(err)
-		c.JSON(400, gin.H{
-			"status":  400,
-			"message": "Invalid form body!",
-		})
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidFormBody)
 		return
 	}
 
@@ -61,19 +51,12 @@ func createEvent(c *gin.Context) {
 
 	invites, err := utils.StringToObjectIDs(form.Invites)
 	if err != nil {
-		log.Println(err)
-		c.JSON(400, gin.H{
-			"status":  400,
-			"message": "Invalid form body!",
-		})
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidFormBody)
 		return
 	}
 
 	if err != nil {
-		c.JSON(400, gin.H{
-			"status":  400,
-			"message": "Invalid ID",
-		})
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidID)
 		return
 	}
 
@@ -92,11 +75,7 @@ func createEvent(c *gin.Context) {
 
 	newPost, err := database.CreateEvent(post)
 	if err != nil {
-		log.Println(err)
-		c.JSON(500, gin.H{
-			"status":  500,
-			"message": "Internal server error!",
-		})
+		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
 		return
 	}
 

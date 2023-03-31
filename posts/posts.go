@@ -1,11 +1,11 @@
 package posts
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log"
+	"net/http"
 	"plusone/backend/database"
+	"plusone/backend/errorHandler"
 	"plusone/backend/types"
 	"plusone/backend/utils"
 	"time"
@@ -15,26 +15,16 @@ func getPostID(c *gin.Context) {
 	id := c.Param("id")
 	objId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"status":  400,
-			"message": "Invalid ID",
-		})
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidFormBody)
 		return
 	}
 
 	post, found, err := database.GetPostID(objId)
 	if !found && err == nil {
-		c.JSON(404, gin.H{
-			"status":  404,
-			"message": fmt.Sprintf("Post with ID %v not found!", id),
-		})
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidID)
 		return
 	} else if !found && err != nil {
-		log.Println(err)
-		c.JSON(500, gin.H{
-			"status":  500,
-			"message": "Internal server error",
-		})
+		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
 		return
 	}
 	c.JSON(200, gin.H{
@@ -49,11 +39,7 @@ func createPost(c *gin.Context) {
 
 	err := c.ShouldBind(&post)
 	if err != nil {
-		log.Println(err)
-		c.JSON(400, gin.H{
-			"status":  400,
-			"message": "Invalid form body!",
-		})
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidFormBody)
 		return
 	}
 
@@ -61,10 +47,7 @@ func createPost(c *gin.Context) {
 
 	eventObjId, err := primitive.ObjectIDFromHex(post.Event)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"status":  400,
-			"message": "Invalid ID",
-		})
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidID)
 		return
 	}
 
@@ -80,19 +63,12 @@ func createPost(c *gin.Context) {
 		CreatedAt:   time.Now(),
 	}
 
-	res, found, error := database.CreatePost(newPost)
-	if !found && error == nil {
-		c.JSON(400, gin.H{
-			"status":  400,
-			"message": "Invalid form body! User not found!",
-		})
+	res, found, err := database.CreatePost(newPost)
+	if !found && err == nil {
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidID)
 		return
-	} else if !found && error != nil {
-		log.Println(error)
-		c.JSON(500, gin.H{
-			"status":  500,
-			"message": "Internal server error!",
-		})
+	} else if !found && err != nil {
+		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
 		return
 	}
 

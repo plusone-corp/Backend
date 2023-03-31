@@ -12,8 +12,6 @@ import (
 func GetUserByID(id primitive.ObjectID) (*types.User, bool, error) {
 	var user *types.User
 
-	log.Println(id.String())
-
 	err := UserCollection.FindOne(Context, bson.D{{"_id", id}}).Decode(&user)
 	if err == mongo.ErrNoDocuments {
 		return nil, false, nil

@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log"
 	"net/http"
 	"plusone/backend/config"
 	"plusone/backend/database"
@@ -57,7 +56,6 @@ func Sign(userId primitive.ObjectID) (*Tokens, error) {
 
 	err = database.UpdateRefreshToken(userId, rfString)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -69,8 +67,7 @@ func ParseAccessToken(tokenStr string) (*types.SignedDetails, bool, *string) {
 		return AccessKey, nil
 	})
 	if err != nil {
-		str := "invalid token, failed to validate the token"
-		return nil, false, &str
+		return nil, false, &errorHandler.FailedTokenValidation
 	}
 
 	claims := token.Claims.(*types.SignedDetails)
@@ -83,9 +80,7 @@ func ParseRefreshToken(tokenStr string) (*types.SignedDetails, bool, *string) {
 		return RefreshKey, nil
 	})
 	if err != nil {
-		log.Println(err, tokenStr)
-		str := "invalid token, failed to validate the token"
-		return nil, false, &str
+		return nil, false, &errorHandler.FailedTokenValidation
 	}
 
 	claims := token.Claims.(*types.SignedDetails)
@@ -117,8 +112,7 @@ func JwtMiddleware() gin.HandlerFunc {
 
 func validateHeaders(header string) (*string, *string) {
 	if !strings.HasPrefix(header, "Bearer") {
-		str := "invalid authorization methods"
-		return nil, &str
+		return nil, &errorHandler.InvalidMethod
 	}
 
 	parts := strings.Split(header, " ")
