@@ -4,7 +4,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 	"plusone/backend/types"
 	"time"
 )
@@ -71,12 +70,10 @@ func GetManyUserID(ids []primitive.ObjectID) (*[]types.UserSensored, bool, error
 }
 
 func UpdateRefreshToken(userId primitive.ObjectID, token string) error {
-	res, err := UserCollection.UpdateOne(Context, bson.D{{"_id", userId}}, bson.D{{"$set", bson.D{{"credentials.refreshToken", token}, {"credentials.lastRefreshed", time.Now()}}}})
+	_, err := UserCollection.UpdateOne(Context, bson.D{{"_id", userId}}, bson.D{{"$set", bson.D{{"credentials.refreshToken", token}, {"credentials.lastRefreshed", time.Now()}}}})
 	if err != nil {
 		return err
 	}
-
-	log.Println(res.ModifiedCount, res.UpsertedID, res.MatchedCount, userId)
 
 	return nil
 }

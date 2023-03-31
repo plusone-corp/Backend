@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log"
 	"math/rand"
 	"net/http"
 	"plusone/backend/database"
@@ -78,7 +77,6 @@ func RefreshRoute(c *gin.Context) {
 
 	user, found, userErr := database.GetUserByID(*id)
 	if userErr != nil {
-		log.Println(err)
 		errorHandler.Unauthorized(c, http.StatusInternalServerError, "Internal Server Error")
 		return
 	} else if !found {

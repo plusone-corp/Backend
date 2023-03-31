@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"plusone/backend/auth"
 	"plusone/backend/events"
@@ -41,12 +40,6 @@ func CorsMiddleware() gin.HandlerFunc {
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
 			return
-		}
-
-		for name, values := range c.Request.Header {
-			for _, value := range values {
-				fmt.Printf("%v: %v\n", name, value)
-			}
 		}
 
 		c.Next()

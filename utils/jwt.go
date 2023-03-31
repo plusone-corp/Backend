@@ -2,7 +2,6 @@ package utils
 
 import (
 	"github.com/gin-gonic/gin"
-	"log"
 	"plusone/backend/database"
 	"plusone/backend/types"
 )
@@ -27,7 +26,6 @@ func GetUser(c *gin.Context) (*types.ResUser, *types.SignedDetails) {
 	if len(user.Events) > 0 {
 		res, found, err := database.GetManyEventsID(user.Events)
 		if !found && err != nil {
-			log.Println("Events ", err)
 			return nil, nil
 		}
 		events = *res
@@ -35,7 +33,6 @@ func GetUser(c *gin.Context) (*types.ResUser, *types.SignedDetails) {
 	if len(user.Friends) > 0 {
 		res, found, err := database.GetManyUserID(user.Friends)
 		if !found && err != nil {
-			log.Println("Friends ", err)
 			return nil, nil
 		}
 		friends = *res
