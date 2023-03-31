@@ -44,7 +44,7 @@ func CreatePost(post types.Post) (*types.Post, bool, error) {
 	return &post, true, nil
 }
 
-func GetLastestPost(userId primitive.ObjectID) (*types.Post, bool, error) {
+func GetLatestPost(userId primitive.ObjectID) (*types.Post, bool, error) {
 
 	var posts []*types.Post
 
