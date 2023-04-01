@@ -61,6 +61,7 @@ type UserSensored struct {
 type Credentials struct {
 	Password      string    `bson:"password" json:"password"`
 	Hash          []byte    `bson:"hash" json:"hash"`
+	RefreshToken  string    `bson:"refreshToken" json:"refreshToken"`
 	LastRefreshed time.Time `bson:"lastRefreshed" json:"lastRefreshed"`
 }
 

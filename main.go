@@ -1,15 +1,11 @@
 package main
 
 import (
-	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
-	"log"
 	"plusone/backend/auth"
-	"plusone/backend/config"
 	"plusone/backend/events"
 	"plusone/backend/posts"
 	"plusone/backend/users"
-	"time"
 )
 
 var (
@@ -22,51 +18,40 @@ func main() {
 	Router.GET("/", hello)
 	Router.NoRoute(handleNotFound)
 
-	var err error
-	auth.AuthMiddleware, err = jwt.New(&jwt.GinJWTMiddleware{
-		Realm:           config.IDENTIFY_KEY,
-		Key:             []byte(config.JWT_SECRET),
-		Timeout:         time.Minute * time.Duration(config.JWT_TIMEOUT_TIME),
-		MaxRefresh:      time.Hour * time.Duration(config.JWT_REFRESH_TIME),
-		IdentityKey:     config.IDENTIFY_KEY,
-		PayloadFunc:     auth.PayloadFunc,
-		IdentityHandler: auth.IdentifyHandler,
-		Authenticator:   auth.Authenticator,
-		Authorizator:    auth.Authorizer,
-		Unauthorized:    auth.Unauthorized,
-		TokenLookup:     "header: Authorization",
-		TokenHeadName:   "Bearer",
-		TimeFunc:        time.Now,
-	})
-	if err != nil {
-		log.Fatal("JWT Error:" + err.Error())
-	}
-
-	errInit := auth.AuthMiddleware.MiddlewareInit()
-	if errInit != nil {
-		log.Fatal("AuthMiddleware.MiddlewareInit() Error:" + errInit.Error())
-	}
+	Router.Use(CorsMiddleware())
 
 	auth.AuthRouters(Router)
 	users.UserHandler(Router)
 	posts.PostHandlers(Router)
 	events.EventsHandlers(Router)
 
-	err = Router.Run(":80")
+	err := Router.Run(":80")
 	if err != nil {
 		panic(err)
 	}
 }
 
+func CorsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
+}
+
 func hello(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"message": "Hello world!",
-	})
+	c.Status(204)
 }
 
 func handleNotFound(c *gin.Context) {
-	claims := jwt.ExtractClaims(c)
-	log.Printf("NoRoute claims: %#v\n", claims)
 	c.JSON(404, gin.H{
 		"status":  404,
 		"message": "Page not found!",

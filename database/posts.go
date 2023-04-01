@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
 	"plusone/backend/types"
 )
 
@@ -44,7 +45,7 @@ func CreatePost(post types.Post) (*types.Post, bool, error) {
 	return &post, true, nil
 }
 
-func GetLastestPost(userId primitive.ObjectID) (*types.Post, bool, error) {
+func GetLatestPost(userId primitive.ObjectID) (*types.Post, bool, error) {
 
 	var posts []*types.Post
 
@@ -56,14 +57,20 @@ func GetLastestPost(userId primitive.ObjectID) (*types.Post, bool, error) {
 	opt := options.Find().SetSort(bson.D{{"createdAt", 1}})
 	cursor, err := PostCollection.Find(Context, filter, opt)
 	if err != nil {
+		log.Println(err)
 		return nil, false, err
 	}
 
 	if err = cursor.All(Context, &posts); err != nil {
+		log.Println("All", err)
 		return nil, false, err
 	}
 
-	return posts[len(posts)-1], true, nil
+	if len(posts) > 0 {
+		return posts[len(posts)-1], true, nil
+	}
+
+	return nil, true, nil
 }
 
 func GetManyPostsID(ids []primitive.ObjectID) (*[]types.Post, bool, error) {
@@ -101,7 +108,7 @@ func GetAllPost(userId primitive.ObjectID) (*[]types.Post, bool, error) {
 }
 
 func validateUser(res types.Post) (*types.ResPost, bool, error) {
-	user, found, err := GetByID(res.Author)
+	user, found, err := GetUserByID(res.Author)
 	if !found && err == nil {
 		return nil, false, nil
 	} else if !found && err != nil {

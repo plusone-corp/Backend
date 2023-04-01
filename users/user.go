@@ -7,7 +7,7 @@ import (
 
 func getUser(c *gin.RouterGroup) {
 	group := c.Group("/@me")
-	group.Use(auth.AuthMiddleware.MiddlewareFunc())
+	group.Use(auth.JwtMiddleware())
 	{
 		group.GET("/", getMe)
 		postGroup := group.Group("/post")

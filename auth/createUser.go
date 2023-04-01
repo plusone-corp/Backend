@@ -3,8 +3,9 @@ package auth
 import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log"
+	"net/http"
 	"plusone/backend/database"
+	"plusone/backend/errorHandler"
 	"plusone/backend/types"
 	"time"
 )
@@ -13,31 +14,19 @@ func createUser(c *gin.Context) {
 	var userData types.UserCreate
 
 	if c.ShouldBind(&userData) != nil {
-		c.JSON(400, gin.H{
-			"status":  400,
-			"message": "Invalid form body",
-		})
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidFormBody)
 		return
 	}
 	salt := GenerateRandomSalt(10)
 
-	user, found, err := database.GetByUsername(userData.Username)
+	user, found, err := database.GetUserByUsername(userData.Username)
 	if err != nil {
-		log.Println(err)
-		c.JSON(500, gin.H{
-			"status":  500,
-			"message": "Internal Server Error",
-		})
+		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
 		return
 	} else if found {
-		c.JSON(400, gin.H{
-			"status":  400,
-			"message": "Username already existed",
-		})
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.UsernameExisted)
 		return
 	}
-
-	log.Println(userData.Description)
 
 	user = &types.User{
 		Username:    userData.Username,
@@ -49,6 +38,7 @@ func createUser(c *gin.Context) {
 		Credentials: types.Credentials{
 			Password:      HashPassword(userData.Password, salt),
 			Hash:          salt,
+			RefreshToken:  "",
 			LastRefreshed: time.Now(),
 		},
 		Description: userData.Description,
@@ -64,10 +54,7 @@ func createUser(c *gin.Context) {
 
 	ok, err := database.CreateUser(*user)
 	if err != nil || !ok {
-		c.JSON(500, gin.H{
-			"status":  500,
-			"message": "Internal Server Error",
-		})
+		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
 		return
 	}
 
