@@ -116,8 +116,8 @@ func JwtMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		_, found := LoggedOutToken.Get(claims.ID)
-		if found {
+		savedToken, found := LoggedOutToken.Get(claims.ID)
+		if found && savedToken == *token {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
 				"status":  http.StatusForbidden,
 				"message": errorHandler.InvalidToken,
