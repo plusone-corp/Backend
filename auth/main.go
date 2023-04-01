@@ -2,6 +2,11 @@ package auth
 
 import (
 	"github.com/gin-gonic/gin"
+	"plusone/backend/utils"
+)
+
+var (
+	LoggedOutToken = utils.NewBlockToken()
 )
 
 func AuthRouters(route *gin.Engine) {
@@ -11,5 +16,6 @@ func AuthRouters(route *gin.Engine) {
 	auth.POST("/register", createUser)
 	auth.Use(JwtMiddleware())
 	{
+		auth.GET("/logout", Logout)
 	}
 }

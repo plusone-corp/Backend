@@ -93,18 +93,35 @@ func JwtMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token, err := validateHeaders(c.GetHeader("Authorization"))
 		if err != nil {
-			errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.AuthorizationKeyNotFound)
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+				"status":  http.StatusForbidden,
+				"message": errorHandler.AuthorizationKeyNotFound,
+			})
 			return
 		}
 
 		claims, valid, parseErr := ParseAccessToken(*token)
 		if !valid && parseErr != nil {
 			if claims.ExpiresAt.Unix() > time.Now().Unix() {
-				errorHandler.Unauthorized(c, http.StatusRequestTimeout, errorHandler.RefreshToken)
+				c.AbortWithStatusJSON(http.StatusRequestTimeout, gin.H{
+					"status":  http.StatusRequestTimeout,
+					"message": errorHandler.RefreshToken,
+				})
 				return
 			}
-			errorHandler.Unauthorized(c, http.StatusUnauthorized, *parseErr)
-			c.Abort()
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"status":  http.StatusForbidden,
+				"message": *parseErr,
+			})
+			return
+		}
+
+		_, found := LoggedOutToken.Get(claims.ID)
+		if found {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+				"status":  http.StatusForbidden,
+				"message": errorHandler.InvalidToken,
+			})
 			return
 		}
 

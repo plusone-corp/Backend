@@ -47,30 +47,21 @@ func CreatePost(post types.Post) (*types.Post, bool, error) {
 
 func GetLatestPost(userId primitive.ObjectID) (*types.Post, bool, error) {
 
-	var posts []*types.Post
+	var post *types.Post
 
 	filter := bson.D{{
 		Key:   "author",
 		Value: userId,
 	}}
 
-	opt := options.Find().SetSort(bson.D{{"createdAt", 1}})
-	cursor, err := PostCollection.Find(Context, filter, opt)
+	opt := options.FindOne().SetSort(bson.D{{"createdAt", -1}})
+	err := PostCollection.FindOne(Context, filter, opt).Decode(&post)
 	if err != nil {
 		log.Println(err)
 		return nil, false, err
 	}
 
-	if err = cursor.All(Context, &posts); err != nil {
-		log.Println("All", err)
-		return nil, false, err
-	}
-
-	if len(posts) > 0 {
-		return posts[len(posts)-1], true, nil
-	}
-
-	return nil, true, nil
+	return post, true, nil
 }
 
 func GetManyPostsID(ids []primitive.ObjectID) (*[]types.Post, bool, error) {

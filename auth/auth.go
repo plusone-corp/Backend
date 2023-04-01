@@ -115,7 +115,40 @@ func RefreshRoute(c *gin.Context) {
 		errorHandler.Unauthorized(c, http.StatusBadRequest, "Refresh token already expired, please use login!")
 		return
 	}
+}
 
+func Logout(c *gin.Context) {
+	token, err := validateHeaders(c.GetHeader("Authorization"))
+	if err != nil {
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.AuthorizationKeyNotFound)
+		return
+	}
+
+	claims, valid, err := ParseAccessToken(*token)
+	if err != nil || !valid {
+		errorHandler.Unauthorized(c, http.StatusForbidden, *err)
+		return
+	}
+
+	id, parseErr := utils.StringToObjectId(claims.ID)
+	if parseErr != nil {
+		errorHandler.Unauthorized(c, http.StatusBadRequest, "Failed to validate user's id")
+		return
+	}
+
+	updateErr := database.RemoveRefreshToken(*id)
+	if updateErr != nil {
+		errorHandler.Unauthorized(c, http.StatusBadRequest, "Failed to update user's id")
+		return
+	}
+
+	LoggedOutToken.Set(claims.ID, *token, claims.ExpiresAt.Time)
+
+	c.JSON(200, gin.H{
+		"status":  200,
+		"message": "Logged out successfully",
+	})
+	return
 }
 
 func GenerateRandomSalt(saltSize int) []byte {

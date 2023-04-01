@@ -66,6 +66,7 @@ func createEvent(c *gin.Context) {
 		Title:       form.Title,
 		Description: form.Description,
 		AgeLimit:    ageLimit,
+		Image:       form.Image,
 		Author:      user.ID,
 		Invites:     invites,
 		Comments:    []types.Comment{},
@@ -84,4 +85,8 @@ func createEvent(c *gin.Context) {
 		"message": "Successfully created new event",
 		"event":   newPost,
 	})
+}
+
+func getLatestEvent(c *gin.Context) {
+
 }

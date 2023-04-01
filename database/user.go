@@ -77,3 +77,12 @@ func UpdateRefreshToken(userId primitive.ObjectID, token string) error {
 
 	return nil
 }
+
+func RemoveRefreshToken(userId primitive.ObjectID) error {
+	_, err := UserCollection.UpdateOne(Context, bson.D{{"_id", userId}}, bson.D{{"$set", bson.D{{"credentials.refreshToken", ""}, {"credentials.lastRefreshed", time.Now()}}}})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

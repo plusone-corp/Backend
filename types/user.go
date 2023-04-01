@@ -88,12 +88,14 @@ type EventCreate struct {
 	Description string   `form:"description" json:"description"`
 	AgeLimit    *int     `form:"ageLimit" json:"ageLimit"`
 	Invites     []string `form:"invites" json:"invites"`
+	Image       string   `form:"image" json:"image"`
 }
 
 type Event struct {
 	Id          primitive.ObjectID   `bson:"_id" json:"_id"`
 	CreatedAt   time.Time            `bson:"createdAt" json:"createdAt"`
 	Title       string               `bson:"title" json:"title"`
+	Image       string               `bson:"image" json:"image"`
 	Description string               `bson:"description" json:"description"`
 	AgeLimit    int                  `bson:"ageLimit" json:"ageLimit"`
 	Author      primitive.ObjectID   `bson:"author" json:"author"`
