@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
 	"plusone/backend/types"
 )
 
@@ -56,14 +57,20 @@ func GetLatestPost(userId primitive.ObjectID) (*types.Post, bool, error) {
 	opt := options.Find().SetSort(bson.D{{"createdAt", 1}})
 	cursor, err := PostCollection.Find(Context, filter, opt)
 	if err != nil {
+		log.Println(err)
 		return nil, false, err
 	}
 
 	if err = cursor.All(Context, &posts); err != nil {
+		log.Println("All", err)
 		return nil, false, err
 	}
 
-	return posts[len(posts)-1], true, nil
+	if len(posts) > 0 {
+		return posts[len(posts)-1], true, nil
+	}
+
+	return nil, true, nil
 }
 
 func GetManyPostsID(ids []primitive.ObjectID) (*[]types.Post, bool, error) {

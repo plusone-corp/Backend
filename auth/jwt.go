@@ -91,9 +91,13 @@ func ParseRefreshToken(tokenStr string) (*types.SignedDetails, bool, *string) {
 
 func JwtMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token := c.GetHeader("X-Token")
+		token, err := validateHeaders(c.GetHeader("Authorization"))
+		if err != nil {
+			errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.AuthorizationKeyNotFound)
+			return
+		}
 
-		claims, valid, parseErr := ParseAccessToken(token)
+		claims, valid, parseErr := ParseAccessToken(*token)
 		if !valid && parseErr != nil {
 			if claims.ExpiresAt.Unix() > time.Now().Unix() {
 				errorHandler.Unauthorized(c, http.StatusRequestTimeout, errorHandler.RefreshToken)
@@ -116,8 +120,8 @@ func validateHeaders(header string) (*string, *string) {
 		return nil, &errorHandler.InvalidMethod
 	}
 
-	parts := strings.Split(header, " ")
-	return &parts[1], nil
+	tokenString := strings.Split(header, " ")[1]
+	return &tokenString, nil
 }
 
 type Tokens struct {

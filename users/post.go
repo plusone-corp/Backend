@@ -2,6 +2,7 @@ package users
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"plusone/backend/database"
 	"plusone/backend/errorHandler"
@@ -15,7 +16,13 @@ func getLatestPost(c *gin.Context) {
 		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidID)
 		return
 	} else if !found && err != nil {
+		log.Println(err)
 		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
+		return
+	}
+
+	if post == nil {
+		errorHandler.Unauthorized(c, http.StatusNotFound, errorHandler.PostNotFound)
 		return
 	}
 

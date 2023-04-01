@@ -61,9 +61,13 @@ func LoginRoute(c *gin.Context) {
 }
 
 func RefreshRoute(c *gin.Context) {
-	token := c.GetHeader("X-Token")
+	token, err := validateHeaders(c.GetHeader("Authorization"))
+	if err != nil {
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.AuthorizationKeyNotFound)
+		return
+	}
 
-	claims, valid, err := ParseRefreshToken(token)
+	claims, valid, err := ParseRefreshToken(*token)
 	if err != nil || !valid {
 		errorHandler.Unauthorized(c, http.StatusUnauthorized, *err)
 		return
@@ -89,7 +93,7 @@ func RefreshRoute(c *gin.Context) {
 	hour := int64(1000 * 60 * 60)
 
 	if calcTime < week && calcTime > hour {
-		if user.Credentials.RefreshToken != token {
+		if user.Credentials.RefreshToken != *token {
 			errorHandler.Unauthorized(c, http.StatusUnauthorized, "Invalid refresh token")
 			return
 		}
