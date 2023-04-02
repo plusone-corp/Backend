@@ -13,7 +13,7 @@ func getLatestPost(c *gin.Context) {
 	user, _ := utils.GetUser(c)
 	post, found, err := database.GetLatestPost(user.ID)
 	if !found && err == nil {
-		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidID)
+		errorHandler.Unauthorized(c, http.StatusNotFound, errorHandler.InvalidID)
 		return
 	} else if !found && err != nil {
 		log.Println(err)

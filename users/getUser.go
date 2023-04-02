@@ -22,7 +22,7 @@ func getUserIdHandler(c *gin.Context) {
 	}
 	userData, found, error := database.GetUserByID(objId)
 
-	user := types.UserSensored{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Level: userData.Level}
+	user := types.UserFiltered{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Level: userData.Level}
 
 	if error != nil {
 		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
@@ -42,7 +42,7 @@ func getUserNameHandler(c *gin.Context) {
 	name := c.Param("name")
 	userData, found, error := database.GetUserByUsername(name)
 
-	user := types.UserSensored{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Level: userData.Level}
+	user := types.UserFiltered{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Level: userData.Level}
 
 	if error != nil {
 		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
@@ -62,7 +62,7 @@ func getUserEmailHandler(c *gin.Context) {
 	email := c.Param("email")
 	userData, found, error := database.GetUserByEmail(email)
 
-	user := types.UserSensored{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Level: userData.Level}
+	user := types.UserFiltered{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Level: userData.Level}
 
 	if error != nil {
 		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)

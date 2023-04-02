@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"math/rand"
 	"net/http"
 	"plusone/backend/database"
@@ -15,7 +14,7 @@ import (
 	"time"
 )
 
-func AuthUser(username string, password string) (*primitive.ObjectID, bool, error) {
+func AuthUser(username string, password string) (*types.User, bool, error) {
 	user, found, err := database.GetUserByUsername(username)
 	if err != nil {
 		return nil, false, err
@@ -23,8 +22,7 @@ func AuthUser(username string, password string) (*primitive.ObjectID, bool, erro
 		return nil, false, nil
 	}
 	isCorrect := doPasswordsMatch(user.Credentials.Password, password, []byte(user.Credentials.Hash))
-	id := user.ID
-	return &id, isCorrect, nil
+	return user, isCorrect, nil
 }
 
 func LoginRoute(c *gin.Context) {
@@ -36,14 +34,14 @@ func LoginRoute(c *gin.Context) {
 	userID := loginVals.Username
 	password := loginVals.Password
 
-	id, checkPassword, err := AuthUser(userID, password)
+	user, checkPassword, err := AuthUser(userID, password)
 	if err != nil {
 		errorHandler.Unauthorized(c, http.StatusNotFound, fmt.Sprintf("User with username %v doesn't exist", userID))
 		return
 	}
 
 	if checkPassword {
-		tokens, err := Sign(*id)
+		tokens, err := Sign((*user).ID)
 		if err != nil {
 			errorHandler.Unauthorized(c, http.StatusInternalServerError, "Failed to sign an access token")
 			return
@@ -52,6 +50,7 @@ func LoginRoute(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status": 200,
 			"token":  tokens,
+			"user":   user,
 		})
 		return
 	}

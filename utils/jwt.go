@@ -6,7 +6,7 @@ import (
 	"plusone/backend/types"
 )
 
-func GetUser(c *gin.Context) (*types.ResUser, *types.SignedDetails) {
+func GetUser(c *gin.Context) (*types.UserResponse, *types.SignedDetails) {
 	payload, exist := c.Get("JWT_PAYLOAD")
 	if !exist {
 		return nil, nil
@@ -21,7 +21,7 @@ func GetUser(c *gin.Context) (*types.ResUser, *types.SignedDetails) {
 	}
 
 	events := []types.Event{}
-	friends := []types.UserSensored{}
+	friends := []types.UserFiltered{}
 
 	if len(user.Events) > 0 {
 		res, found, err := database.GetManyEventsID(user.Events)
@@ -38,7 +38,7 @@ func GetUser(c *gin.Context) (*types.ResUser, *types.SignedDetails) {
 		friends = *res
 	}
 
-	newUser := types.ResUser{
+	newUser := types.UserResponse{
 		ID:          user.ID,
 		Username:    user.Username,
 		Email:       user.Email,

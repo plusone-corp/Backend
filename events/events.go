@@ -3,6 +3,7 @@ package events
 import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"log"
 	"net/http"
 	"plusone/backend/database"
 	"plusone/backend/errorHandler"
@@ -32,7 +33,7 @@ func getEventID(c *gin.Context) {
 }
 
 func createEvent(c *gin.Context) {
-	var form *types.EventCreate
+	var form types.EventForm
 
 	err := c.ShouldBind(&form)
 	if err != nil {
@@ -40,7 +41,14 @@ func createEvent(c *gin.Context) {
 		return
 	}
 
+	if !utils.EventFormValidation(form) {
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidFormBody)
+		return
+	}
+
 	user, _ := utils.GetUser(c)
+
+	log.Println("Age", user)
 
 	var ageLimit int
 	if form.AgeLimit == nil {
@@ -60,12 +68,24 @@ func createEvent(c *gin.Context) {
 		return
 	}
 
+	geoloc, err := utils.StringArrToGeoJSON(form.Location)
+	if err != nil {
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidFormBody)
+		return
+	}
+
+	if geoloc == nil {
+		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
+		return
+	}
+
 	post := types.Event{
 		Id:          primitive.NewObjectID(),
 		CreatedAt:   time.Now(),
 		Title:       form.Title,
 		Description: form.Description,
 		AgeLimit:    ageLimit,
+		Location:    *geoloc,
 		Image:       form.Image,
 		Author:      user.ID,
 		Invites:     invites,

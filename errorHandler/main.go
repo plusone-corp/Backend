@@ -11,9 +11,10 @@ var (
 	FailedTokenValidation    = "Failed to validate token, please login again!"
 	InvalidFormBody          = "Invalid form body, please contact support!"
 	InternalServerError      = "Internal server error, please try again later!"
+	UsersNotFound            = "There are no users found."
 	PostNotFound             = "No posts found for that user!"
 	UsernameExisted          = "Username already existed"
-	InvalidID                = "The User ID provided is invalid or not found!"
+	InvalidID                = "The document ID provided is invalid or the document with that id is not found!"
 	RefreshToken             = "Access token expired, please refresh the token!"
 )
 

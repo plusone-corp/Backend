@@ -101,7 +101,13 @@ func JwtMiddleware() gin.HandlerFunc {
 		}
 
 		claims, valid, parseErr := ParseAccessToken(*token)
-		if !valid && parseErr != nil {
+		if parseErr != nil && claims == nil {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+				"status":  http.StatusForbidden,
+				"message": errorHandler.InvalidToken,
+			})
+			return
+		} else if !valid && parseErr != nil {
 			if claims.ExpiresAt.Unix() > time.Now().Unix() {
 				c.AbortWithStatusJSON(http.StatusRequestTimeout, gin.H{
 					"status":  http.StatusRequestTimeout,

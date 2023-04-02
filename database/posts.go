@@ -7,7 +7,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
 	"plusone/backend/types"
 )
 
@@ -56,8 +55,9 @@ func GetLatestPost(userId primitive.ObjectID) (*types.Post, bool, error) {
 
 	opt := options.FindOne().SetSort(bson.D{{"createdAt", -1}})
 	err := PostCollection.FindOne(Context, filter, opt).Decode(&post)
-	if err != nil {
-		log.Println(err)
+	if err == mongo.ErrNoDocuments {
+		return nil, false, nil
+	} else if err != nil {
 		return nil, false, err
 	}
 

@@ -38,8 +38,8 @@ func CreateEvent(event types.Event) (*types.Event, error) {
 	return &event, nil
 }
 
-func SensoreUser(userData types.User) types.UserSensored {
-	user := types.UserSensored{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Level: userData.Level}
+func SensoreUser(userData types.User) types.UserFiltered {
+	user := types.UserFiltered{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Level: userData.Level}
 	return user
 }
 

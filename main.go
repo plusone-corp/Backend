@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"plusone/backend/auth"
 	"plusone/backend/events"
+	"plusone/backend/friends"
 	"plusone/backend/posts"
 	"plusone/backend/users"
 )
@@ -24,6 +25,7 @@ func main() {
 	users.UserHandler(Router)
 	posts.PostHandlers(Router)
 	events.EventsHandlers(Router)
+	friends.FriendsHandlers(Router)
 
 	err := Router.Run(":80")
 	if err != nil {

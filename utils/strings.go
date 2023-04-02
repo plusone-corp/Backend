@@ -3,6 +3,8 @@ package utils
 import (
 	"errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"plusone/backend/types"
+	"strconv"
 	"strings"
 )
 
@@ -27,4 +29,25 @@ func StringToObjectId(id string) (*primitive.ObjectID, error) {
 	}
 
 	return &objId, nil
+}
+
+func StringArrToGeoJSON(arr string) (*types.GeoJSON, error) {
+	parts := strings.Split(arr, ",")
+	// Convert the string slice to a float64 slice
+	var coords []float64
+	for _, part := range parts {
+		f, err := strconv.ParseFloat(strings.TrimSpace(part), 64)
+		if err != nil {
+			return nil, err
+		}
+		coords = append(coords, f)
+	}
+
+	// Create a new GeoJSONPoint object using the converted coordinates
+	geoPoint := types.GeoJSON{
+		Type:        "Point",
+		Coordinates: coords,
+	}
+
+	return &geoPoint, nil
 }

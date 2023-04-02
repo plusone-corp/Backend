@@ -56,8 +56,8 @@ func CreateUser(user types.User) (bool, error) {
 	return true, nil
 }
 
-func GetManyUserID(ids []primitive.ObjectID) (*[]types.UserSensored, bool, error) {
-	var users []types.UserSensored
+func GetManyUserID(ids []primitive.ObjectID) (*[]types.UserFiltered, bool, error) {
+	var users []types.UserFiltered
 	cursor, err := UserCollection.Find(Context, bson.D{{"_id", bson.D{{"$in", ids}}}})
 	if err != nil {
 		return nil, false, err
