@@ -11,7 +11,7 @@ if [[ "$1" == "start" ]]; then
     # Run
     echo "--- EXECUTING IMAGES ---"
 
-    docker run -d --name plusone -p 3000:3000/tcp plusone-image
+    docker run -d --name plusone -p 80:80/tcp plusone-image
 
     echo "--- FINSIHED EXECUTION ---"
 
@@ -35,13 +35,13 @@ elif [[ "$1" == "restart" ]]; then
     # Run
     echo "--- EXECUTING IMAGES ---"
 
-    docker run -d --name plusone -p 3000:3000/tcp plusone-image
+    docker run -d --name plusone -p 80:80/tcp plusone-image
 
     echo "--- FINSIHED EXECUTION ---"
 
     # Confirm
     echo "--- DOCKER PROCESS ARE RUNNING ---"
-    echo "visit http://194.13.83.57:3000 for the results"
+    echo "visit http://194.13.83.57:80 for the results"
 elif [[ "$1" == "delete" ]]; then
     echo "--- DELETING OLD PROCESSES ---"
     docker rm -f plusone
