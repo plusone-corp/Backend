@@ -4,6 +4,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"plusone/backend/types"
 )
 
@@ -43,6 +44,60 @@ func SensoreUser(userData types.User) types.UserFiltered {
 	return user
 }
 
+func GetLatestEvent(userId primitive.ObjectID) (*types.Event, bool, error) {
+
+	var post *types.Event
+
+	filter := bson.D{{
+		Key:   "author",
+		Value: userId,
+	}}
+
+	opt := options.FindOne().SetSort(bson.D{{"createdAt", -1}})
+	err := EventsCollection.FindOne(Context, filter, opt).Decode(&post)
+	if err == mongo.ErrNoDocuments {
+		return nil, false, nil
+	} else if err != nil {
+		return nil, false, err
+	}
+
+	return post, true, nil
+}
+
+func GetAllEvent(userId primitive.ObjectID) (*[]types.Event, bool, error) {
+	var events []types.Event
+
+	filter := bson.D{{
+		"author",
+		userId,
+	}}
+
+	opt := options.Find().SetSort(bson.D{{"createdAt", 1}})
+	cursor, err := PostCollection.Find(Context, filter, opt)
+	if err != nil {
+		return nil, false, err
+	}
+
+	if err = cursor.All(Context, &events); err != nil {
+		return nil, false, err
+	}
+
+	return &events, true, nil
+}
+
+func GetManyEventsID(ids []primitive.ObjectID) (*[]types.Event, bool, error) {
+	var posts []types.Event
+	cursor, err := EventsCollection.Find(Context, bson.D{{"_id", bson.D{{"$in", ids}}}})
+	if err != nil {
+		return nil, false, err
+	}
+
+	if err = cursor.All(Context, &posts); err != nil {
+		return nil, false, err
+	}
+	return &posts, true, nil
+}
+
 func validateEvent(res *types.Event) (*types.ResEvent, bool, error) {
 	author, found, err := GetUserByID(res.Author)
 	if !found && err == nil {
@@ -74,17 +129,4 @@ func validateEvent(res *types.Event) (*types.ResEvent, bool, error) {
 	}
 
 	return post, true, nil
-}
-
-func GetManyEventsID(ids []primitive.ObjectID) (*[]types.Event, bool, error) {
-	var posts []types.Event
-	cursor, err := EventsCollection.Find(Context, bson.D{{"_id", bson.D{{"$in", ids}}}})
-	if err != nil {
-		return nil, false, err
-	}
-
-	if err = cursor.All(Context, &posts); err != nil {
-		return nil, false, err
-	}
-	return &posts, true, nil
 }

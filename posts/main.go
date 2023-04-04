@@ -11,5 +11,7 @@ func PostHandlers(c *gin.Engine) {
 	{
 		group.GET("/get/:id", getPostID)
 		group.POST("/create", createPost)
+		group.GET("/latest", getLatestPost)
+		group.GET("/all", getAllPost)
 	}
 }

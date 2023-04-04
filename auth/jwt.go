@@ -94,7 +94,7 @@ func JwtMiddleware() gin.HandlerFunc {
 		token, err := validateHeaders(c.GetHeader("Authorization"))
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-				"status":  http.StatusForbidden,
+				"status":  http.StatusBadRequest,
 				"message": errorHandler.AuthorizationKeyNotFound,
 			})
 			return
@@ -110,7 +110,7 @@ func JwtMiddleware() gin.HandlerFunc {
 		} else if !valid && parseErr != nil {
 			if claims.ExpiresAt.Unix() > time.Now().Unix() {
 				c.AbortWithStatusJSON(http.StatusRequestTimeout, gin.H{
-					"status":  http.StatusRequestTimeout,
+					"status":  http.StatusForbidden,
 					"message": errorHandler.RefreshToken,
 				})
 				return

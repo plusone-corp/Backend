@@ -108,5 +108,42 @@ func createEvent(c *gin.Context) {
 }
 
 func getLatestEvent(c *gin.Context) {
+	user, _ := utils.GetUser(c)
+	event, found, err := database.GetLatestEvent(user.ID)
+	if !found && err == nil {
+		errorHandler.Unauthorized(c, http.StatusNotFound, errorHandler.InvalidID)
+		return
+	} else if !found && err != nil {
+		log.Println(err)
+		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
+		return
+	}
 
+	if event == nil {
+		errorHandler.Unauthorized(c, http.StatusNotFound, errorHandler.PostNotFound)
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"status": 200,
+		"event":  event,
+	})
+}
+
+func getALlEvent(c *gin.Context) {
+	user, _ := utils.GetUser(c)
+
+	events, found, err := database.GetAllEvent(user.ID)
+	if !found && err == nil {
+		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidID)
+		return
+	} else if !found && err != nil {
+		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"status": 200,
+		"events": events,
+	})
 }

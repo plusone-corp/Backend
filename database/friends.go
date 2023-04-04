@@ -4,6 +4,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"plusone/backend/types"
 )
 
@@ -46,4 +47,25 @@ func AddFriend(userId primitive.ObjectID, targetId string) error {
 	}
 
 	return nil
+}
+
+func GetAllFriends(userId primitive.ObjectID) (*[]types.UserFiltered, error) {
+	var friends []types.UserFiltered
+
+	filter := bson.D{{
+		"author",
+		userId,
+	}}
+
+	opt := options.Find().SetSort(bson.D{{"createdAt", 1}})
+	cursor, err := PostCollection.Find(Context, filter, opt)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = cursor.All(Context, &friends); err != nil {
+		return nil, err
+	}
+
+	return &friends, nil
 }

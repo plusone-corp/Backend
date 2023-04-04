@@ -12,5 +12,6 @@ func EventsHandlers(c *gin.Engine) {
 		group.GET("/get/:id", getEventID)
 		group.POST("/create", createEvent)
 		group.GET("/latest", getLatestEvent)
+		group.GET("/all", getALlEvent)
 	}
 }
