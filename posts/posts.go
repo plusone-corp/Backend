@@ -106,12 +106,12 @@ func getLatestPost(c *gin.Context) {
 func getAllPost(c *gin.Context) {
 	user, _ := utils.GetUser(c)
 
-	posts, found, err := database.GetAllPost(user.ID)
-	if !found && err == nil {
-		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidID)
-		return
-	} else if !found && err != nil {
-		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
+	posts, err := database.GetAllPost(user.ID)
+	if err == nil {
+		c.JSON(200, gin.H{
+			"status": 200,
+			"posts":  []*types.Post{},
+		})
 		return
 	}
 

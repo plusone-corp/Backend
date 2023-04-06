@@ -25,7 +25,7 @@ func createUser(c *gin.Context) {
 		return
 	}
 
-	salt := GenerateRandomSalt(10)
+	salt := generateHashSalt(10)
 
 	_, found, err := database.GetUserByUsername(userData.Username)
 	if err != nil {
@@ -51,7 +51,7 @@ func createUser(c *gin.Context) {
 		Email:       userData.Email,
 		Location:    types.GeoJSON{},
 		Credentials: types.Credentials{
-			Password:      HashPassword(userData.Password, salt),
+			Password:      hashPassword(userData.Password, salt),
 			Hash:          salt,
 			RefreshToken:  "",
 			LastRefreshed: time.Now(),

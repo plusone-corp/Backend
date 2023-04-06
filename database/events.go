@@ -64,7 +64,7 @@ func GetLatestEvent(userId primitive.ObjectID) (*types.Event, bool, error) {
 	return post, true, nil
 }
 
-func GetAllEvent(userId primitive.ObjectID) (*[]types.Event, bool, error) {
+func GetAllEvent(userId primitive.ObjectID) (*[]types.Event, error) {
 	var events []types.Event
 
 	filter := bson.D{{
@@ -75,14 +75,14 @@ func GetAllEvent(userId primitive.ObjectID) (*[]types.Event, bool, error) {
 	opt := options.Find().SetSort(bson.D{{"createdAt", 1}})
 	cursor, err := PostCollection.Find(Context, filter, opt)
 	if err != nil {
-		return nil, false, err
+		return nil, err
 	}
 
 	if err = cursor.All(Context, &events); err != nil {
-		return nil, false, err
+		return nil, err
 	}
 
-	return &events, true, nil
+	return &events, nil
 }
 
 func GetManyEventsID(ids []primitive.ObjectID) (*[]types.Event, bool, error) {

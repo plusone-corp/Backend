@@ -7,7 +7,6 @@ import (
 
 func UserHandler(route *gin.Engine) {
 	group := route.Group("/users")
-	getUser(group)
 	group.Use(auth.JwtMiddleware())
 	{
 		group.GET("/getId/:id", getUserIdHandler)

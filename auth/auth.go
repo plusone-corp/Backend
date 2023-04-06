@@ -14,17 +14,6 @@ import (
 	"time"
 )
 
-func AuthUser(username string, password string) (*types.User, bool, error) {
-	user, found, err := database.GetUserByUsername(username)
-	if err != nil {
-		return nil, false, err
-	} else if !found && err == nil {
-		return nil, false, nil
-	}
-	isCorrect := doPasswordsMatch(user.Credentials.Password, password, []byte(user.Credentials.Hash))
-	return user, isCorrect, nil
-}
-
 func LoginRoute(c *gin.Context) {
 	var loginVals types.Login
 	if err := c.ShouldBind(&loginVals); err != nil {
@@ -34,7 +23,7 @@ func LoginRoute(c *gin.Context) {
 	userID := loginVals.Username
 	password := loginVals.Password
 
-	user, checkPassword, err := AuthUser(userID, password)
+	user, checkPassword, err := authorizeUser(userID, password)
 	if err != nil {
 		errorHandler.Unauthorized(c, http.StatusNotFound, fmt.Sprintf("User with username %v doesn't exist", userID))
 		return
@@ -150,7 +139,7 @@ func Logout(c *gin.Context) {
 	return
 }
 
-func GenerateRandomSalt(saltSize int) []byte {
+func generateHashSalt(saltSize int) []byte {
 	var salt = make([]byte, saltSize)
 
 	_, err := rand.Read(salt[:])
@@ -162,7 +151,7 @@ func GenerateRandomSalt(saltSize int) []byte {
 	return salt
 }
 
-func HashPassword(password string, salt []byte) string {
+func hashPassword(password string, salt []byte) string {
 	// Convert password string to byte slice
 	var passwordBytes = []byte(password)
 
@@ -184,9 +173,19 @@ func HashPassword(password string, salt []byte) string {
 	return hashedPasswordHex
 }
 
-func doPasswordsMatch(hashedPassword, currPassword string,
-	salt []byte) bool {
-	var currPasswordHash = HashPassword(currPassword, salt)
+func doPasswordsMatch(hashedPassword, currPassword string, salt []byte) bool {
+	var currPasswordHash = hashPassword(currPassword, salt)
 
 	return hashedPassword == currPasswordHash
+}
+
+func authorizeUser(username string, password string) (*types.User, bool, error) {
+	user, found, err := database.GetUserByUsername(username)
+	if err != nil {
+		return nil, false, err
+	} else if !found && err == nil {
+		return nil, false, nil
+	}
+	isCorrect := doPasswordsMatch(user.Credentials.Password, password, []byte(user.Credentials.Hash))
+	return user, isCorrect, nil
 }

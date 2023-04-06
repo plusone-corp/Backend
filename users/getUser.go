@@ -7,7 +7,6 @@ import (
 	"plusone/backend/database"
 	"plusone/backend/errorHandler"
 	"plusone/backend/types"
-	"plusone/backend/utils"
 )
 
 func getUserIdHandler(c *gin.Context) {
@@ -20,11 +19,11 @@ func getUserIdHandler(c *gin.Context) {
 		})
 		return
 	}
-	userData, found, error := database.GetUserByID(objId)
+	userData, found, err := database.GetUserByID(objId)
 
 	user := types.UserFiltered{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Level: userData.Level}
 
-	if error != nil {
+	if err != nil {
 		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
 		return
 	} else if !found {
@@ -40,11 +39,11 @@ func getUserIdHandler(c *gin.Context) {
 
 func getUserNameHandler(c *gin.Context) {
 	name := c.Param("name")
-	userData, found, error := database.GetUserByUsername(name)
+	userData, found, err := database.GetUserByUsername(name)
 
 	user := types.UserFiltered{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Level: userData.Level}
 
-	if error != nil {
+	if err != nil {
 		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
 		return
 	} else if !found {
@@ -60,11 +59,11 @@ func getUserNameHandler(c *gin.Context) {
 
 func getUserEmailHandler(c *gin.Context) {
 	email := c.Param("email")
-	userData, found, error := database.GetUserByEmail(email)
+	userData, found, err := database.GetUserByEmail(email)
 
 	user := types.UserFiltered{Username: userData.Username, Avatar: userData.Avatar, DisplayName: userData.DisplayName, Description: userData.Description, Level: userData.Level}
 
-	if error != nil {
+	if err != nil {
 		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
 		return
 	} else if !found {
@@ -75,18 +74,5 @@ func getUserEmailHandler(c *gin.Context) {
 		"status":  200,
 		"message": "User found!",
 		"user":    user,
-	})
-}
-
-func getMe(c *gin.Context) {
-	user, claims := utils.GetUser(c)
-	if user == nil {
-		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
-		return
-	}
-	c.JSON(200, gin.H{
-		"status": 200,
-		"userID": claims.ID,
-		"user":   user,
 	})
 }

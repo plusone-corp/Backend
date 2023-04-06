@@ -24,14 +24,14 @@ func GetUser(c *gin.Context) (*types.UserResponse, *types.SignedDetails) {
 	friends := []types.UserFiltered{}
 
 	if len(user.Events) > 0 {
-		res, found, err := database.GetManyEventsID(user.Events)
-		if !found && err != nil {
+		res, err := database.GetAllEvent(user.ID)
+		if err != nil {
 			return nil, nil
 		}
 		events = *res
 	}
 	if len(user.Friends) > 0 {
-		res, found, err := database.GetManyUserID(user.Friends)
+		res, err := database.GetAllFriends(user.ID)
 		if !found && err != nil {
 			return nil, nil
 		}

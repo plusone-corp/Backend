@@ -77,7 +77,7 @@ func GetManyPostsID(ids []primitive.ObjectID) (*[]types.Post, bool, error) {
 	return &posts, true, nil
 }
 
-func GetAllPost(userId primitive.ObjectID) (*[]types.Post, bool, error) {
+func GetAllPost(userId primitive.ObjectID) (*[]types.Post, error) {
 	var posts []types.Post
 
 	filter := bson.D{{
@@ -88,14 +88,14 @@ func GetAllPost(userId primitive.ObjectID) (*[]types.Post, bool, error) {
 	opt := options.Find().SetSort(bson.D{{"createdAt", 1}})
 	cursor, err := PostCollection.Find(Context, filter, opt)
 	if err != nil {
-		return nil, false, err
+		return nil, err
 	}
 
 	if err = cursor.All(Context, &posts); err != nil {
-		return nil, false, err
+		return nil, err
 	}
 
-	return &posts, true, nil
+	return &posts, nil
 }
 
 func validateUser(res types.Post) (*types.ResPost, bool, error) {

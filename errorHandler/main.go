@@ -13,6 +13,7 @@ var (
 	InternalServerError      = "Internal server error, please try again later!"
 	UsersNotFound            = "There are no users found."
 	PostNotFound             = "No posts found for that user!"
+	EventNotFound            = "No event found for that user!"
 	UsernameExisted          = "Username already existed"
 	InvalidID                = "The document ID provided is invalid or the document with that id is not found!"
 	RefreshToken             = "Access token expired, please refresh the token!"

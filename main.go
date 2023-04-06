@@ -5,6 +5,7 @@ import (
 	"plusone/backend/auth"
 	"plusone/backend/events"
 	"plusone/backend/friends"
+	"plusone/backend/me"
 	"plusone/backend/posts"
 	"plusone/backend/users"
 )
@@ -26,6 +27,7 @@ func main() {
 	posts.PostHandlers(Router)
 	events.EventsHandlers(Router)
 	friends.FriendsHandlers(Router)
+	me.MeHandlers(Router)
 
 	err := Router.Run(":80")
 	if err != nil {

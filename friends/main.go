@@ -11,5 +11,6 @@ func FriendsHandlers(c *gin.Engine) {
 	{
 		group.GET("/list", getFriendList)
 		group.GET("/add/:id", addFriend)
+		group.GET("/all", getAllFriends)
 	}
 }

@@ -133,12 +133,12 @@ func getLatestEvent(c *gin.Context) {
 func getALlEvent(c *gin.Context) {
 	user, _ := utils.GetUser(c)
 
-	events, found, err := database.GetAllEvent(user.ID)
-	if !found && err == nil {
-		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidID)
-		return
-	} else if !found && err != nil {
-		errorHandler.Unauthorized(c, http.StatusInternalServerError, errorHandler.InternalServerError)
+	events, err := database.GetAllEvent(user.ID)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"status": 200,
+			"events": []*types.Event{},
+		})
 		return
 	}
 
