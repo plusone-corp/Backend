@@ -7,6 +7,7 @@ import (
 	"plusone/backend/events"
 	"plusone/backend/posts"
 	ratelimiter "plusone/backend/rateLimiter"
+	"plusone/backend/types"
 	"plusone/backend/users"
 
 	"github.com/gin-gonic/gin"
@@ -30,7 +31,12 @@ func main() {
 
 
 	// Attach ratelimiter middleware to main router
-	Router.Use(ratelimiter.LimitRequest(ctx, rdb))
+	Router.Use(ratelimiter.LimitRequest(ctx, rdb, []types.RateLimit{
+		// ! Please note that include sub routes option may rate limit the non existant routes
+		{ Route: "/auth", IncludeSubRoutes: true, RequestPerHour: 15 },
+		{ Route: "/users", IncludeSubRoutes: true, RequestPerHour: 10 },
+		{ Route: "/events", IncludeSubRoutes: true, RequestPerHour: 150 },
+	}))
 
 	Router.GET("/", hello)
 	Router.NoRoute(handleNotFound)
