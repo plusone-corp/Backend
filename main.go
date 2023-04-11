@@ -1,13 +1,18 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"context"
 	"plusone/backend/auth"
+	"plusone/backend/config"
 	"plusone/backend/events"
 	"plusone/backend/friends"
 	"plusone/backend/me"
 	"plusone/backend/posts"
+	ratelimiter "plusone/backend/rateLimiter"
 	"plusone/backend/users"
+
+	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 )
 
 var (
@@ -17,6 +22,18 @@ var (
 func main() {
 	// Init
 	Router = gin.Default()
+
+	// Initialize context and Redis client	
+	ctx := context.Background()
+	rdb := redis.NewClient(&redis.Options{
+		Addr:	  config.REDIS_URL,
+		Password: config.REDIS_SECRET,
+	})
+
+
+	// Attach ratelimiter middleware to main router
+	Router.Use(ratelimiter.LimitRequest(ctx, rdb))
+
 	Router.GET("/", hello)
 	Router.NoRoute(handleNotFound)
 
