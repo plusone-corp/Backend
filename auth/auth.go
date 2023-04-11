@@ -194,21 +194,33 @@ func Logout(c *gin.Context) {
 	return
 }
 
+// CreateUser
+/*
+	Input: types.UserForm
+	Output: {
+		"status": httpStatus,
+		"message": string
+	}
+*/
 func CreateUser(c *gin.Context) {
 	var userData types.UserForm
 
+	// Validating the request body to types.UserForm
 	if c.ShouldBind(&userData) != nil {
 		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidFormBody)
 		return
 	}
 
+	// If the request body doesn't match to the types, return error
 	if !utils.UserFormValidation(userData) {
 		errorHandler.Unauthorized(c, http.StatusBadRequest, errorHandler.InvalidFormBody)
 		return
 	}
 
+	// Generate a hash, so we can hash the password
 	salt := generateHashSalt(10)
 
+	// Check if the username already exist
 	_, found, err := database.GetUserByUsername(userData.Username)
 	if err != nil {
 		log.Println("Get user", err)
@@ -219,20 +231,24 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
+	// If display doesn't exist, then assign username to display
 	displayName := userData.DisplayName
 	if displayName == "" {
 		displayName = userData.Username
 	}
 
+	// Create a full user types
 	newUser := types.User{
 		Username:    userData.Username,
 		DisplayName: userData.DisplayName,
 		CreatedAt:   time.Now(),
-		Avatar:      "https://plusone-corp.github.io/PlusOne/logo/adaptive-icon-1024.png",
-		ID:          primitive.NewObjectID(),
-		Email:       userData.Email,
-		Location:    types.GeoJSON{},
+		// Default avatar
+		Avatar:   "https://plusone-corp.github.io/PlusOne/logo/adaptive-icon-1024.png",
+		ID:       primitive.NewObjectID(),
+		Email:    userData.Email,
+		Location: types.GeoJSON{},
 		Credentials: types.Credentials{
+			// Hash password here
 			Password:      hashPassword(userData.Password, salt),
 			Hash:          salt,
 			RefreshToken:  "",
@@ -256,6 +272,7 @@ func CreateUser(c *gin.Context) {
 		},
 	}
 
+	// Create user
 	ok, err := database.CreateUser(newUser)
 	if err != nil || !ok {
 		log.Println(err)
@@ -263,6 +280,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
+	// Return status OK
 	c.JSON(202, gin.H{
 		"status":  202,
 		"message": "User created successfully",
@@ -270,6 +288,8 @@ func CreateUser(c *gin.Context) {
 	return
 }
 
+// generateHashSalt
+// Create a hash
 func generateHashSalt(saltSize int) []byte {
 	var salt = make([]byte, saltSize)
 
@@ -282,6 +302,8 @@ func generateHashSalt(saltSize int) []byte {
 	return salt
 }
 
+// hashPassword
+// hash the password with the generated hash
 func hashPassword(password string, salt []byte) string {
 	// Convert password string to byte slice
 	var passwordBytes = []byte(password)
@@ -304,12 +326,16 @@ func hashPassword(password string, salt []byte) string {
 	return hashedPasswordHex
 }
 
+// doPasswordsMatch
+// match the password
 func doPasswordsMatch(hashedPassword, currPassword string, salt []byte) bool {
 	var currPasswordHash = hashPassword(currPassword, salt)
 
 	return hashedPassword == currPasswordHash
 }
 
+// authorizeUser
+// check if the username and password are correct
 func authorizeUser(username string, password string) (*types.User, bool, error) {
 	user, found, err := database.GetUserByUsername(username)
 	if err != nil {

@@ -19,8 +19,10 @@ var (
 	AccessKey  = []byte(config.JWT_SECRET)
 )
 
+// Sign	generate an access token and refresh token
 func Sign(userId primitive.ObjectID) (*Tokens, error) {
 
+	// Create a new claim for access token
 	acClaim := &types.SignedDetails{
 		ID: userId.String(),
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -29,6 +31,7 @@ func Sign(userId primitive.ObjectID) (*Tokens, error) {
 		},
 	}
 
+	// Create a new claim for refresh token
 	rfClaim := &types.SignedDetails{
 		ID: userId.String(),
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -37,10 +40,11 @@ func Sign(userId primitive.ObjectID) (*Tokens, error) {
 		},
 	}
 
+	// Set signing method
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, acClaim)
-
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, rfClaim)
 
+	// Sign tokens
 	actString, err := accessToken.SignedString(AccessKey)
 	if err != nil {
 		return nil, err
@@ -50,19 +54,23 @@ func Sign(userId primitive.ObjectID) (*Tokens, error) {
 		return nil, err
 	}
 
+	// Create token object
 	tokens := Tokens{
 		AccessToken:  actString,
 		RefreshToken: rfString,
 	}
 
+	// Update the refresh token in the database
 	err = database.UpdateRefreshToken(userId, rfString)
 	if err != nil {
 		return nil, err
 	}
 
+	// return the token
 	return &tokens, nil
 }
 
+// ParseAccessToken check if the token is valid
 func ParseAccessToken(tokenStr string) (*types.SignedDetails, bool, *string) {
 	token, err := jwt.ParseWithClaims(tokenStr, &types.SignedDetails{}, func(token *jwt.Token) (interface{}, error) {
 		return AccessKey, nil
@@ -76,6 +84,7 @@ func ParseAccessToken(tokenStr string) (*types.SignedDetails, bool, *string) {
 	return claims, token.Valid, nil
 }
 
+// ParseRefreshToken check if the token is valid
 func ParseRefreshToken(tokenStr string) (*types.SignedDetails, bool, *string) {
 	token, err := jwt.ParseWithClaims(tokenStr, &types.SignedDetails{}, func(token *jwt.Token) (interface{}, error) {
 		return RefreshKey, nil
@@ -89,8 +98,10 @@ func ParseRefreshToken(tokenStr string) (*types.SignedDetails, bool, *string) {
 	return claims, token.Valid, nil
 }
 
+// JwtMiddleware get the user data
 func JwtMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Get token
 		token, err := validateHeaders(c.GetHeader("Authorization"))
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
@@ -100,6 +111,7 @@ func JwtMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		// Check if the token is valid
 		claims, valid, parseErr := ParseAccessToken(*token)
 		if parseErr != nil && claims == nil {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
@@ -122,6 +134,7 @@ func JwtMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		// Check if the is blacklisted, if yes, return error
 		savedToken, found := LoggedOutToken.Get(claims.ID)
 		if found && savedToken == *token {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
@@ -131,6 +144,7 @@ func JwtMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		// Save userdata of the token with a key "JWT_PAYLOAD" (check utils/jwt.go for usage)
 		c.Set("JWT_PAYLOAD", claims)
 
 		c.Next()

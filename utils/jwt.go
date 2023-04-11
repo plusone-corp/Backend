@@ -6,13 +6,21 @@ import (
 	"plusone/backend/types"
 )
 
+// GetUser Get userdata from JWT_PAYLOAD
 func GetUser(c *gin.Context) (*types.UserResponse, *types.SignedDetails) {
+	// get the data from key
 	payload, exist := c.Get("JWT_PAYLOAD")
 	if !exist {
 		return nil, nil
 	}
+
+	// Parse the data to usable types
 	claims := payload.(*types.SignedDetails)
+
+	// Parse userid from string to primitive.ObjectID
 	userId, err := StringToObjectId(claims.ID)
+
+	// Get user data
 	user, found, err := database.GetUserByID(*userId)
 	if !found && err == nil {
 		return nil, nil
@@ -20,9 +28,11 @@ func GetUser(c *gin.Context) (*types.UserResponse, *types.SignedDetails) {
 		return nil, nil
 	}
 
+	// Generate structs
 	events := []types.Event{}
 	friends := []types.UserFiltered{}
 
+	// If there are events or friends data, get them
 	if len(user.Events) > 0 {
 		res, err := database.GetAllEvent(user.ID)
 		if err != nil {
@@ -38,6 +48,7 @@ func GetUser(c *gin.Context) (*types.UserResponse, *types.SignedDetails) {
 		friends = *res
 	}
 
+	// Apply the data
 	newUser := types.UserResponse{
 		ID:          user.ID,
 		Username:    user.Username,
@@ -53,5 +64,6 @@ func GetUser(c *gin.Context) (*types.UserResponse, *types.SignedDetails) {
 		Level:       user.Level,
 	}
 
+	// Return the userdata and claim (this can be used in getMe() or something like that)
 	return &newUser, claims
 }
