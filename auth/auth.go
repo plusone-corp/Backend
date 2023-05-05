@@ -280,10 +280,16 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	// Return status OK
-	c.JSON(202, gin.H{
-		"status":  202,
-		"message": "User created successfully",
+	tokens, err := Sign(newUser.ID)
+	if err != nil {
+		errorHandler.Unauthorized(c, http.StatusInternalServerError, "Failed to sign an access token")
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"status": 200,
+		"token":  tokens,
+		"user":   newUser,
 	})
 	return
 }
